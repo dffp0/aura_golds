@@ -26,17 +26,11 @@ app.get("/api/salla/callback", async (req, res) => {
         client_id: process.env.SALLA_CLIENT_ID,
         client_secret: process.env.SALLA_CLIENT_SECRET,
         redirect_uri: "https://aura-backend-vdqi.onrender.com/api/salla/callback",
-        code: code,
-      }),
+        code: code
+      })
     });
 
     const tokenData = await tokenRes.json();
-
-    if (!tokenData.access_token) {
-      console.error(tokenData);
-      return res.status(400).json({ error: "فشل جلب Access Token", tokenData });
-    }
-
     global.SALLA_TOKEN = tokenData.access_token;
 
     res.send("تم ربط المتجر بنجاح ✅ تقدر تقفل الصفحة الآن");
