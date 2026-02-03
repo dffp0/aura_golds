@@ -1,37 +1,31 @@
-const express = require("express");
-const cors = require("cors");
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("السيرفر شغال 🎉");
-});
-
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", time: new Date().toISOString() });
-});
-
-// 🛒 جلب منتجات سلة (تجربة)
-app.get("/api/salla/products", async (req, res) => {
+app.get("/api/salla/callback", async (req, res) => {
   try {
-    const response = await fetch("https://api.salla.dev/admin/v2/products", {
-      headers: {
-        Authorization: `Bearer ${process.env.SALLA_ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
-      },
+    const code = req.query.code;
+
+    if (!code) {
+      return res.status(400).send("ما وصل code من سلة");
+    }
+
+    const tokenRes = await fetch("https://accounts.salla.sa/oauth2/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        grant_type: "authorization_code",
+        client_id: process.env.SALLA_CLIENT_ID,
+        client_secret: process.env.SALLA_CLIENT_SECRET,
+        redirect_uri: "https://aura-backend-vdqi.onrender.com/api/salla/callback",
+        code: code
+      })
     });
 
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "فشل الاتصال بسلة" });
-  }
-});
+    const tokenData = await tokenRes.json();
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+    // نخزّن التوكن مؤقتًا (للتجربة فقط)
+    global.SALLA_TOKEN = tokenData.access_token;
+
+    res.send("تم ربط المتجر بنجاح ✅ تقدر تقفل الصفحة الآن");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("صار خطأ أثناء ربط سلة");
+  }
 });
