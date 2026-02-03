@@ -31,7 +31,8 @@ app.get("/api/salla/callback", async (req, res) => {
     });
 
     const tokenData = await tokenRes.json();
-    process.env.SALLA_ACCESS_TOKEN = tokenData.access_token;
+    res.json(tokenData);
+
 
     res.send("تم ربط المتجر بنجاح ✅ تقدر تقفل الصفحة الآن");
   } catch (err) {
