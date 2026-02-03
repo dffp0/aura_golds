@@ -31,7 +31,7 @@ app.get("/api/salla/callback", async (req, res) => {
     });
 
     const tokenData = await tokenRes.json();
-    global.SALLA_TOKEN = tokenData.access_token;
+    process.env.SALLA_ACCESS_TOKEN = tokenData.access_token;
 
     res.send("تم ربط المتجر بنجاح ✅ تقدر تقفل الصفحة الآن");
   } catch (err) {
@@ -48,7 +48,7 @@ app.get("/api/salla/products", async (req, res) => {
 
     const response = await fetch("https://api.salla.dev/admin/v2/products", {
       headers: {
-        Authorization: `Bearer ${global.SALLA_TOKEN}`,
+      Authorization: `Bearer ${process.env.SALLA_ACCESS_TOKEN}`,
         "Content-Type": "application/json",
       },
     });
